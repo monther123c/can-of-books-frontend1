@@ -1,7 +1,7 @@
 import React from 'react';
 import axios from 'axios';
 import Carousel from 'react-bootstrap/Carousel';
-
+import { withAuth0 } from '@auth0/auth0-react';
 import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
 import Form from "react-bootstrap/Form";
@@ -22,10 +22,12 @@ class BestBooks extends React.Component {
       currentBook:{}
     }
   }
+
  
   componentDidMount = () =>{
+    const { user } = this.props.auth0
     axios
-    .get(`https://myfrontend112.herokuapp.com/Books`)
+    .get(`https://myfrontend112.herokuapp.com/Books?name=${user.email}`)
     .then(result =>{
         this.setState({
           books:result.data
@@ -39,10 +41,12 @@ class BestBooks extends React.Component {
 
  addBook = (event) =>{
     event.preventDefault()
+    const { user } = this.props.auth0
     const obj = {
       title : event.target.BookTitle.value,
       description : event.target.BookDes.value,
-      states :this.state.states
+      states :this.state.states,
+      name:user.email
      }
      
 
@@ -63,9 +67,10 @@ class BestBooks extends React.Component {
   }
 
   deleteBook= (id) => {
+    const { user } = this.props.auth0
     console.log(id);
     axios
-    .delete(`https://myfrontend112.herokuapp.com/deleteBook/${id}`) //http://localhost:3001/deleteBook?id=${id}
+    .delete(`https://myfrontend112.herokuapp.com/deleteBook/${id}?name=${user.email}`) //http://localhost:3001/deleteBook?id=${id}
     .then(result =>{
       
       this.setState({
@@ -109,16 +114,18 @@ event.preventDefault();
 let obj = {
   title :event.target.bookTitle.value,
   description:event.target.bookDes.value,
-  available:event.target.bookStates.value
+  available:event.target.bookStates.value,
+  name:user.email
 }
 let id = this.state.currentBook._id;
 axios
-.put(`https://myfrontend12.herokuapp.com/updateBook/${id}`,obj)
+.put(`https://myfrontend112.herokuapp.com/updateBook/${id}`,obj)
 .then(result => {
 this.setState({
   books : result.data 
 })
 this.handleCloseForm();
+
 }).catch(err=>{
   console.log(err);
 })
@@ -129,17 +136,7 @@ this.handleCloseForm();
   render() {
     return (
       
-    
-
-
-
-
-
-
-
-        
-
-
+ 
 <>
 <Button id = "mybtn" onClick={()=>{
   this.setState({
@@ -189,7 +186,7 @@ this.handleCloseForm();
         
 
 
-        <div  id="MainDiv">
+          <div  id="MainDiv">
         {this.state.books.length ? (
           <div id="myDiv" style={{ width: "800px" }}>
             <Carousel fade>
@@ -208,6 +205,7 @@ this.handleCloseForm();
                     <h3>{item.title}</h3>
                     <p>{item.description}</p>
                     <p>{item.states}</p>
+                    <p>{item.name}</p>
                      <Button className = "silderbuttons" variant="primary" onClick = { ()=> this.deleteBook(item._id)}>Press Me To Delete !</Button>
                      <Button className = "silderbuttons" variant="primary" onClick = { ()=> this.openTheForm(item)}>Press Me to Update ! </Button>
                   </Carousel.Caption>
@@ -233,4 +231,4 @@ this.handleCloseForm();
   }
 }
 
-export default BestBooks;
+export default withAuth0(BestBooks);
