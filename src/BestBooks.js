@@ -27,7 +27,7 @@ class BestBooks extends React.Component {
   componentDidMount = () =>{
     const { user } = this.props.auth0
     axios
-    .get(`https://myfrontend112.herokuapp.com/Books?name=${user.email}`)
+    .get(`https://myfrontend112.herokuapp.com/Books/${user.email}`)
     .then(result =>{
         this.setState({
           books:result.data
@@ -46,12 +46,13 @@ class BestBooks extends React.Component {
       title : event.target.BookTitle.value,
       description : event.target.BookDes.value,
       states :this.state.states,
-      name:user.email
+      name:user.email,
+      email : user.email
      }
      
-
+  
     axios
-    .post(`https://myfrontend112.herokuapp.com/addBook`, obj)
+    .post(`${process.env.REACT_APP_URL}addBook/${user.email}`, obj)
     .then(result =>{
       
       this.setState({
@@ -70,7 +71,7 @@ class BestBooks extends React.Component {
     const { user } = this.props.auth0
     console.log(id);
     axios
-    .delete(`https://myfrontend112.herokuapp.com/deleteBook/${id}?name=${user.email}`) //http://localhost:3001/deleteBook?id=${id}
+    .delete(`${process.env.REACT_APP_URL}deleteBook/${id}/${user.email}`) //http://localhost:3001/deleteBook?id=${id}
     .then(result =>{
       
       this.setState({
@@ -110,6 +111,7 @@ openTheForm = (item) =>{
 }
 
 updateBook = (event) =>{
+  const { user } = this.props.auth0
 event.preventDefault();
 let obj = {
   title :event.target.bookTitle.value,
@@ -119,7 +121,7 @@ let obj = {
 }
 let id = this.state.currentBook._id;
 axios
-.put(`https://myfrontend112.herokuapp.com/updateBook/${id}`,obj)
+.put(`${process.env.REACT_APP_URL}updateBook/${id}/${user.email}`,obj)
 .then(result => {
 this.setState({
   books : result.data 
